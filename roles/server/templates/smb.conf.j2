@@ -5,12 +5,29 @@
 
 [global]
   # Server information
-  netbios name = {% if samba_netbios_name is defined %}{{ samba_netbios_name }}{% else %}{{ ansible_hostname }}{% endif %}
+  # netbios name = {% if samba_netbios_name is defined %}{{ samba_netbios_name }}{% else %}{{ ansible_hostname }}{% endif %}
 
   workgroup = {{ samba_workgroup }}
 {% if samba_realm is defined %}
   realm = {{ samba_realm }}
 {% endif %}
+  password server = {{ samba_password_server }}
+
+  # kerberos method = secrets and keytab
+  
+  #idmap domains = {{ samba_workgroup }}
+  idmap config * : backend = tdb
+  idmap config * : range = 3000-7999
+  idmap config {{ samba_workgroup }} : backend = rid
+  idmap config {{ samba_workgroup }} : range = 10000-999999  
+
+  winbind enum groups = yes
+  winbind enum users = yes
+  winbind use default domain = true
+  winbind offline logon = false
+  winbind refresh tickets = yes
+  winbind cache time = 60
+
   server string = {{ samba_server_string }}
 
 {% if samba_apple_extensions is defined %}
@@ -116,7 +133,7 @@
   path = {{ share.path|default([samba_shares_root,share.name]|join('/')) }}
   public = {{ share.public|default('no') }}
 {% if share.valid_users is defined %}
-  valid users= {{ share.valid_users }}
+  valid users = {{ share.valid_users }}
 {% endif %}
 {% if share.write_list is defined %}
   write list = {{ share.write_list }}

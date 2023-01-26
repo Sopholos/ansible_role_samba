@@ -5,3 +5,12 @@
     name: "{{ item }}"
     state: restarted
   with_items: "{{ samba_services }}"
+
+- name: restart samba related services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - smbd
+    - winbind

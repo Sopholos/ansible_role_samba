@@ -1,6 +1,5 @@
 # File: roles/samba/tasks/main.yml
 ---
-
 - name: Include OS specific variables
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
@@ -30,6 +29,10 @@
   register: samba_version
   changed_when: false
   tags: samba
+
+- name: Linux Join Active Directory Domain Tasks
+  include_tasks: join-domain.yml
+  when: linux_joindomain
 
 - name: Install SELinux package
   ansible.builtin.package:

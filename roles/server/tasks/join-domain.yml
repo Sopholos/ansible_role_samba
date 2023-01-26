@@ -1,0 +1,54 @@
+---
+- name: Install domain-related packages
+  ansible.builtin.package:
+    name:
+      - winbind
+      - libpam-winbind
+      - libnss-winbind
+      - krb5-config
+      - samba-dsdb-modules
+      - samba-vfs-modules
+    state: present
+  
+- name: Checking Domain Join status
+  command: id "{{ linux_joindomain_join_user }}"
+  register: ad_status
+  changed_when: false
+  ignore_errors: true
+
+- name: Domain configs and Join {{ linux_joindomain_domainname }}
+  block:      
+    - name: Samba configuration
+      ansible.builtin.template:
+        dest: "{{ samba_configuration }}"
+        src: smb.conf.j2
+        validate: 'testparm -s %s'
+        mode: '0644'
+      notify:
+        - restart samba related services
+      tags: samba
+      
+    - name: nsswitch.conf
+      ansible.builtin.template:
+        dest: /etc/nsswitch.conf
+        src: nsswitch.conf.j2
+        validate: 'testparm -s %s'
+        mode: '0644'
+      notify:
+        - restart samba related services
+      tags: samba
+
+    - name: Add pam authentification to common-session
+      lineinfile:
+        path: "/etc/pam.d/common-session"
+        line: "session optional        pam_mkhomedir.so skel=/etc/skel umask=077"
+
+    - name: Join {{ ansible_distribution }} {{ ansible_distribution_major_version }} into Domain {{ linux_joindomain_domainname }}
+      expect:
+        command: /bin/bash -c "net ads join -U {{ linux_joindomain_join_user }} {{ linux_joindomain_domainname }}"
+        responses:
+          Password for *: "{{ linux_joindomain_join_password }}"
+      notify:
+        - restart samba related services
+
+  when: ad_status.rc !=0
