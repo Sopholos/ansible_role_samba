@@ -95,6 +95,10 @@
   nt pipe support = no
 {% endif %}
 
+{% if samba_allow_insecure_wide_links is defined %}
+  allow insecure wide links = {{ samba_allow_insecure_wide_links }}
+{% endif %}
+
 {% if samba_global_include is defined %}
   include = {{ samba_configuration_dir }}/{{ samba_global_include | basename }}
 {% endif %}
@@ -154,6 +158,30 @@
   force create mode = {{ share.force_create_mode|default('0664') }}
   directory mode = {{ share.directory_mode|default('0775') }}
   force directory mode = {{ share.force_directory_mode|default('0775') }}
+
+{% if share.force_group is defined %}
+  force group = {{ share.force_group }}
+{% endif %}
+
+{% if share.force_user is defined %}
+  force user = {{ share.force_user }}
+{% endif %}
+
+{% if share.force_security_mode is defined %}
+  force security mode = {{ share.force_security_mode }}
+{% endif %}
+
+{% if share.security_mask is defined %}
+  security mask = {{ share.security_mask }}
+{% endif %}
+
+{% if share.follow_symlinks is defined %}
+  follow symlinks = {{ share.follow_symlinks }}
+{% endif %}
+{% if share.wide_links is defined %}
+  wide links = {{ share.wide_links }}
+{% endif %}
+
 {% if share.include_file is defined %}
   include = {{ samba_configuration_dir }}/{{ share.include_file | basename }}
 {% endif %}
