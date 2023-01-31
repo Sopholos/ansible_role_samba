@@ -167,14 +167,6 @@
   force user = {{ share.force_user }}
 {% endif %}
 
-{% if share.force_security_mode is defined %}
-  force security mode = {{ share.force_security_mode }}
-{% endif %}
-
-{% if share.security_mask is defined %}
-  security mask = {{ share.security_mask }}
-{% endif %}
-
 {% if share.follow_symlinks is defined %}
   follow symlinks = {{ share.follow_symlinks }}
 {% endif %}
